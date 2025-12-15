@@ -5,6 +5,7 @@ import { playMoveSound, playWinSound, playDrawSound, initAudio } from './utils/s
 import GameBoard from './components/GameBoard';
 import Scanner from './components/Scanner';
 import Statistics from './components/Statistics';
+import CursorAnimation from './components/CursorAnimation';
 import { Cpu, Users, Bluetooth, Zap, Shield, Skull, Sword, BarChart3, Smartphone } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -14,7 +15,6 @@ const App: React.FC = () => {
   const [xIsNext, setXIsNext] = useState<boolean>(true);
   const [winState, setWinState] = useState<WinState>({ winner: null, line: null });
   const [isAiThinking, setIsAiThinking] = useState<boolean>(false);
-  const [showPvpConfirm, setShowPvpConfirm] = useState<boolean>(false);
   
   // Game Statistics State
   const [stats, setStats] = useState({ xWins: 0, oWins: 0, draws: 0 });
@@ -92,6 +92,8 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen w-full bg-[#0f172a] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#0f172a] to-black text-white flex flex-col items-center overflow-hidden relative">
       
+      <CursorAnimation />
+
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-neonBlue/10 rounded-full blur-[100px] animate-pulse"></div>
@@ -142,99 +144,53 @@ const App: React.FC = () => {
               <div className="space-y-3">
                  <button 
                   onClick={() => setMode(GameMode.SCANNING)}
-                  className="w-full flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 hover:border-blue-400/60 transition group"
+                  className="w-full flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 hover:border-blue-400/60 transition group text-left"
                 >
-                  <div className="flex items-center space-x-3">
-                    <Bluetooth className="text-neonBlue group-hover:animate-pulse" />
-                    <div className="text-left">
-                      <div className="font-bold text-white">Nearby Connect</div>
-                      <div className="text-xs text-gray-400">Scan for local devices</div>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white/10 p-2 rounded-full"><Bluetooth className="text-white w-5 h-5" /></div>
+                    <div>
+                        <div className="font-bold text-white group-hover:text-neonBlue transition">Nearby Connect</div>
+                        <div className="text-xs text-blue-200/60">Scan for local players</div>
                     </div>
                   </div>
-                  <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]"></div>
                 </button>
 
                 <button 
-                  onClick={() => setShowPvpConfirm(true)}
-                  className="w-full p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-left text-sm text-gray-300"
+                  onClick={() => startGame(GameMode.GAME_PVP)}
+                  className="w-full flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition group text-left"
                 >
-                  Pass & Play (Offline)
+                   <div className="flex items-center gap-3">
+                    <div className="bg-white/10 p-2 rounded-full"><Smartphone className="text-white w-5 h-5" /></div>
+                    <div>
+                        <div className="font-bold text-white group-hover:text-neonPink transition">Local Device</div>
+                        <div className="text-xs text-gray-400">Pass & Play</div>
+                    </div>
+                  </div>
                 </button>
               </div>
             </div>
 
-            {/* Stats Button */}
-            <button 
-              onClick={() => setMode(GameMode.STATS)}
-              className="w-full py-3 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition flex items-center justify-center gap-2"
+             {/* Stats Button */}
+             <button 
+                onClick={() => setMode(GameMode.STATS)}
+                className="w-full flex items-center justify-center space-x-2 py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 transition"
             >
-              <BarChart3 className="w-4 h-4" />
-              <span>View Statistics</span>
+                <BarChart3 className="w-5 h-5" />
+                <span>View Statistics</span>
             </button>
-
-          </div>
-        )}
-
-        {/* Pass & Play Confirmation Modal */}
-        {showPvpConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-              <div className="max-w-sm w-full bg-[#0f172a] border border-neonBlue/30 rounded-2xl p-6 shadow-[0_0_30px_rgba(0,243,255,0.2)] text-center space-y-6 relative overflow-hidden animate-fade-in-up">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-neonBlue to-neonPurple"></div>
-                  
-                  <div className="mx-auto w-16 h-16 rounded-full bg-neonBlue/10 flex items-center justify-center border border-neonBlue/30 shadow-[0_0_15px_rgba(0,243,255,0.2)] animate-pulse">
-                    <Smartphone className="w-8 h-8 text-neonBlue" />
-                  </div>
-                  
-                  <div className="space-y-3">
-                      <h3 className="text-xl font-bold text-white tracking-wide">Pass & Play Mode</h3>
-                      <p className="text-gray-300 text-sm leading-relaxed">
-                          Two players share <span className="text-neonBlue font-semibold">one device</span>.
-                          <br/>
-                          Pass it between turns!
-                          <br/>
-                          <span className="text-xs text-gray-500 uppercase tracking-widest mt-2 block">Player X goes first</span>
-                      </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                      <button 
-                          onClick={() => setShowPvpConfirm(false)}
-                          className="py-3 rounded-xl border border-white/10 text-gray-400 hover:bg-white/5 transition text-sm font-semibold"
-                      >
-                          Cancel
-                      </button>
-                      <button 
-                          onClick={() => {
-                              startGame(GameMode.GAME_PVP);
-                              setShowPvpConfirm(false);
-                          }}
-                          className="py-3 rounded-xl bg-neonBlue/10 border border-neonBlue/50 text-neonBlue hover:bg-neonBlue/20 transition text-sm font-bold shadow-[0_0_15px_rgba(0,243,255,0.3)]"
-                      >
-                          I Understand
-                      </button>
-                  </div>
-              </div>
+            
           </div>
         )}
 
         {mode === GameMode.SCANNING && (
           <Scanner 
-            onConnected={() => startGame(GameMode.GAME_PVP)} 
+            onConnected={() => startGame(GameMode.GAME_PVP)}
             onCancel={() => setMode(GameMode.MENU)}
-          />
-        )}
-        
-        {mode === GameMode.STATS && (
-          <Statistics 
-            xWins={stats.xWins}
-            oWins={stats.oWins}
-            draws={stats.draws}
-            onBack={() => setMode(GameMode.MENU)}
           />
         )}
 
         {(mode === GameMode.GAME_VS_CPU || mode === GameMode.GAME_PVP) && (
-          <GameBoard
+          <GameBoard 
             squares={squares}
             xIsNext={xIsNext}
             winState={winState}
@@ -242,16 +198,20 @@ const App: React.FC = () => {
             onReset={resetGame}
             onHome={() => setMode(GameMode.MENU)}
             isAiThinking={isAiThinking}
-            modeLabel={mode === GameMode.GAME_VS_CPU ? `AI: ${difficulty}` : 'LOCAL PvP'}
+            modeLabel={mode === GameMode.GAME_VS_CPU ? `Single Player (${difficulty})` : 'Multiplayer (PvP)'}
           />
         )}
 
-      </main>
+        {mode === GameMode.STATS && (
+            <Statistics 
+                xWins={stats.xWins}
+                oWins={stats.oWins}
+                draws={stats.draws}
+                onBack={() => setMode(GameMode.MENU)}
+            />
+        )}
 
-      <footer className="p-4 text-xs text-gray-600 z-10">
-        {mode === GameMode.SCANNING && "Note: Simulating connection protocol for demo purposes."}
-        {mode === GameMode.GAME_PVP && "Local Multiplayer Active"}
-      </footer>
+      </main>
     </div>
   );
 };
