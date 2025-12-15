@@ -1,0 +1,5 @@
+{
+  "name": "Neon Tic-Tac-Toe Pro",
+  "description": "A futuristic Tic-Tac-Toe game featuring an invincible AI engine, difficulty selection, and a simulated nearby device connection mode for local multiplayer.",
+  "requestFramePermissions": []
+}
